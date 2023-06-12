@@ -3209,6 +3209,23 @@ bool llama_load_session_file(struct llama_context * ctx, const char * path_sessi
     return true;
 }
 
+
+bool llama_load_session_data(struct llama_context * ctx, const uint8_t * data, size_t data_size, llama_token * tokens_out, size_t n_token_capacity, size_t * n_token_count_out) {
+    const std::string file_name = "TMP_FILE_SESSION_" + std::to_string(rand()) + ".bin";
+
+    std::ofstream file(file_name, std::ios::binary | std::ios::out);
+    file.write((const char *) data, data_size);
+    bool output = llama_load_session_file(ctx, file_name.c_str(), tokens_out, n_token_capacity, n_token_count_out);
+
+    if (!output) {
+        fprintf(stderr, "%s : failed to load session data!\n", __func__);
+    }
+    // Removing the file again
+    remove(file_name.c_str());
+
+    return output;
+}
+
 bool llama_save_session_file(struct llama_context * ctx, const char * path_session, const llama_token * tokens, size_t n_token_count) {
     llama_file file(path_session, "wb");
 
@@ -3230,6 +3247,25 @@ bool llama_save_session_file(struct llama_context * ctx, const char * path_sessi
 
         file.write_raw(state_data.data(), n_state_size_cur);
     }
+
+    return true;
+}
+
+bool llama_save_session_data(struct llama_context * ctx, const llama_token * tokens, size_t n_token_count, const char** output, size_t* data_size) {
+    const std::string file_name = "TMP_FILE_SESSION_" + std::to_string(rand()) + ".bin";
+    llama_save_session_file(ctx, file_name.c_str(), tokens, n_token_count);
+
+    std::ifstream file(file_name, std::ios::binary | std::ios::in);
+    file.seekg(0, std::ios::end);
+    size_t size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    *output = new char[size];
+    file.read((char*)(*output), size);
+    *data_size = size;
+
+    file.close();
+    remove(file_name.c_str());
 
     return true;
 }

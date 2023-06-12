@@ -184,8 +184,11 @@ extern "C" {
     LLAMA_API size_t llama_set_state_data(struct llama_context * ctx, uint8_t * src);
 
     // Save/load session file
+
     LLAMA_API bool llama_load_session_file(struct llama_context * ctx, const char * path_session, llama_token * tokens_out, size_t n_token_capacity, size_t * n_token_count_out);
+    LLAMA_API bool llama_load_session_data(struct llama_context * ctx, const uint8_t * data, size_t data_size, llama_token * tokens_out, size_t n_token_capacity, size_t * n_token_count_out);
     LLAMA_API bool llama_save_session_file(struct llama_context * ctx, const char * path_session, const llama_token * tokens, size_t n_token_count);
+    LLAMA_API bool llama_save_session_data(struct llama_context * ctx, const llama_token * tokens, size_t n_token_count, const char** output, size_t* data_size);
 
     // Run the llama inference to obtain the logits and probabilities for the next token.
     // tokens + n_tokens is the provided batch of new tokens to process
